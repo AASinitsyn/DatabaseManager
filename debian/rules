@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cd backend && go build -o database-manager -ldflags="-s -w" main.go
+
+override_dh_auto_install:
+	dh_auto_install
+	mkdir -p $(CURDIR)/debian/database-manager/etc/database-manager
+	mkdir -p $(CURDIR)/debian/database-manager/var/lib/database-manager
+	mkdir -p $(CURDIR)/debian/database-manager/lib/systemd/system
+	cp debian/database-manager.service $(CURDIR)/debian/database-manager/lib/systemd/system/
+

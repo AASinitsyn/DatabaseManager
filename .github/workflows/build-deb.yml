@@ -1,0 +1,101 @@
+name: Build DEB Package
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential devscripts debhelper
+
+      - name: Download Go dependencies
+        working-directory: ./backend
+        run: go mod download
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION=$(echo "${{ github.ref }}" | sed 's/refs\/tags\/v//')
+          else
+            GIT_DESCRIBE=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+            VERSION=$(echo "$GIT_DESCRIBE" | sed 's/^v//' | sed 's/-/~/g')
+            if [[ "$VERSION" == "dev" ]] || [[ "$VERSION" == *"~"* ]]; then
+              VERSION="0.0.0~$(date +%Y%m%d%H%M%S)+${GITHUB_SHA:0:7}"
+            fi
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+
+      - name: Update changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DEB_VERSION="${VERSION}-1"
+          DATE=$(date -R)
+          cat > debian/changelog << EOF
+          database-manager (${DEB_VERSION}) unstable; urgency=medium
+
+            * Автоматическая сборка из CI/CD
+            * Версия: ${VERSION}
+            * Коммит: ${{ github.sha }}
+
+           -- GitHub Actions <noreply@github.com>  ${DATE}
+          EOF
+          cat debian/changelog
+
+      - name: Build DEB package
+        run: |
+          dpkg-buildpackage -us -uc -b
+
+      - name: Find DEB package
+        id: find_deb
+        run: |
+          DEB_FILE=$(ls -1 ../database-manager_*.deb 2>/dev/null | head -1)
+          if [ -z "$DEB_FILE" ]; then
+            echo "Ошибка: deb пакет не найден"
+            exit 1
+          fi
+          echo "deb_file=${DEB_FILE}" >> $GITHUB_OUTPUT
+          echo "Найден пакет: ${DEB_FILE}"
+          dpkg-deb -I "${DEB_FILE}"
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-manager-deb
+          path: ${{ steps.find_deb.outputs.deb_file }}
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.find_deb.outputs.deb_file }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

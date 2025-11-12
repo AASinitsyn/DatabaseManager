@@ -1,0 +1,20 @@
+[Unit]
+Description=Database Manager - универсальный менеджер баз данных
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/share/database-manager
+ExecStart=/usr/bin/database-manager
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Переменные окружения
+Environment="PORT=8080"
+
+[Install]
+WantedBy=multi-user.target
+

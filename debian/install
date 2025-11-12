@@ -1,0 +1,3 @@
+backend/database-manager usr/bin/
+htmx/* usr/share/database-manager/htmx/
+

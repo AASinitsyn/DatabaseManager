@@ -1,0 +1,16 @@
+Source: database-manager
+Section: utils
+Priority: optional
+Maintainer: Database Manager <admin@example.com>
+Build-Depends: debhelper (>= 11), golang-go (>= 1.21)
+Standards-Version: 4.5.0
+Homepage: https://github.com/example/database-manager
+
+Package: database-manager
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Универсальный менеджер баз данных
+ Database Manager - веб-приложение для управления различными типами
+ баз данных через единый интерфейс. Поддерживает PostgreSQL, MongoDB,
+ Elasticsearch, Redis, Kafka, RabbitMQ и многие другие системы.
+
