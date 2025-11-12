@@ -1,0 +1,23 @@
+database-manager для Debian
+============================
+
+Этот пакет устанавливает Database Manager - универсальный менеджер баз данных.
+
+После установки:
+- Конфигурационные файлы находятся в /etc/database-manager/
+- Статические файлы находятся в /usr/share/database-manager/htmx/
+- Сервис доступен через systemd: database-manager.service
+
+Управление сервисом:
+  sudo systemctl start database-manager    # Запустить
+  sudo systemctl stop database-manager     # Остановить
+  sudo systemctl restart database-manager  # Перезапустить
+  sudo systemctl status database-manager   # Статус
+  sudo systemctl enable database-manager   # Включить автозапуск
+  sudo systemctl disable database-manager  # Отключить автозапуск
+
+По умолчанию сервис слушает порт 8080. Для изменения порта отредактируйте
+файл /lib/systemd/system/database-manager.service и измените переменную PORT.
+
+Веб-интерфейс доступен по адресу: http://localhost:8080
+

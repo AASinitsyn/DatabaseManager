@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Manager - HTMX</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+                    </svg>
+                    <div onclick="showConnectionsView()" class="cursor-pointer">
+                        <h1 class="text-xl font-bold">Database Manager</h1>
+                        <p class="text-sm text-gray-500">Управление подключениями и операции с БД</p>
+                    </div>
+                </div>
+                <div id="selected-connection-info"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Connections View -->
+        <div id="connections-view">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Connection List -->
+                <div class="lg:col-span-2">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold">Сохраненные подключения</h3>
+                    </div>
+                    <div id="connections-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <!-- Connections will be rendered here -->
+                    </div>
+                    <div id="empty-state" class="hidden">
+                        <div class="bg-white rounded-lg border shadow-sm p-12 text-center">
+                            <svg class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+                            </svg>
+                            <h3 class="text-lg font-semibold mb-2">Нет сохраненных подключений</h3>
+                            <p class="text-sm text-gray-500">Создайте новое подключение к базе данных, чтобы начать работу</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connection Form -->
+                <div>
+                    <div class="bg-white rounded-lg border shadow-sm">
+                        <div class="p-6 border-b">
+                            <h3 class="text-lg font-semibold flex items-center gap-2">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Новое подключение
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">Добавьте новое подключение к базе данных</p>
+                        </div>
+                        <div class="p-6">
+                            <form id="connection-form" class="space-y-4">
+                                <div class="space-y-2">
+                                    <label for="name" class="block text-sm font-medium">Название подключения</label>
+                                    <input type="text" id="name" name="name" required
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Например: Продакшн PostgreSQL">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="type" class="block text-sm font-medium">Тип базы данных</label>
+                                    <select id="type" name="type" required
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="PostgreSQL">PostgreSQL</option>
+                                        <option value="Elasticsearch">Elasticsearch</option>
+                                        <option value="Meilisearch">Meilisearch</option>
+                                        <option value="Aerospike">Aerospike</option>
+                                        <option value="ClickHouse">ClickHouse</option>
+                                        <option value="MongoDB">MongoDB</option>
+                                        <option value="Cassandra">Cassandra</option>
+                                        <option value="Redis">Redis</option>
+                                        <option value="InfluxDB">InfluxDB</option>
+                                        <option value="Neo4j">Neo4j</option>
+                                        <option value="Couchbase">Couchbase</option>
+                                        <option value="Supabase">Supabase</option>
+                                        <option value="Druid">Druid</option>
+                                        <option value="CockroachDB">CockroachDB</option>
+                                        <option value="Kafka">Kafka</option>
+                                        <option value="RabbitMQ">RabbitMQ</option>
+                                        <option value="Zookeeper">Zookeeper</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label for="host" class="block text-sm font-medium">Хост</label>
+                                        <input type="text" id="host" name="host" value="localhost" required
+                                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label for="port" class="block text-sm font-medium">Порт</label>
+                                        <input type="text" id="port" name="port" value="5432" required
+                                            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="database" class="block text-sm font-medium">База данных / Namespace</label>
+                                    <input type="text" id="database" name="database" required
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="my_database">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="username" class="block text-sm font-medium">Имя пользователя</label>
+                                    <input type="text" id="username" name="username" required
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="username">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="password" class="block text-sm font-medium">Пароль</label>
+                                    <input type="password" id="password" name="password"
+                                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="••••••••">
+                                    <p class="text-xs text-gray-500 hidden" id="password-hint">При редактировании оставьте пустым, чтобы не менять</p>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="ssl" name="ssl" class="h-4 w-4">
+                                    <label for="ssl" class="text-sm">Использовать SSL</label>
+                                </div>
+
+                                <button type="submit"
+                                    class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                    Добавить подключение
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workspace View -->
+        <div id="workspace-view" class="hidden">
+            <div class="space-y-6">
+                <!-- Back Button -->
+                <div class="bg-white rounded-lg border shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div id="workspace-connection-info"></div>
+                        <button onclick="showConnectionsView()"
+                            class="px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors">
+                            ← К подключениям
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="bg-white rounded-lg border shadow-sm">
+                    <div class="border-b">
+                        <div class="flex">
+                            <button onclick="switchTab('query')" data-tab="query"
+                                class="tab-button flex-1 px-6 py-3 border-b-2 border-blue-600 font-medium">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Запросы
+                                </div>
+                            </button>
+                            <button onclick="switchTab('users')" data-tab="users"
+                                class="tab-button flex-1 px-6 py-3 border-b-2 border-transparent hover:bg-gray-50">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    </svg>
+                                    Пользователи
+                                </div>
+                            </button>
+                            <button onclick="switchTab('tables')" data-tab="tables"
+                                class="tab-button flex-1 px-6 py-3 border-b-2 border-transparent hover:bg-gray-50">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    Таблицы
+                                </div>
+                            </button>
+                            <button onclick="switchTab('databases')" data-tab="databases"
+                                class="tab-button flex-1 px-6 py-3 border-b-2 border-transparent hover:bg-gray-50">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Базы данных
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="tab-contents" class="p-6">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t bg-white mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="text-center text-sm text-gray-500">
+                <p>Database Manager • HTMX + Vanilla JS</p>
+                <p class="mt-2">Поддержка: PostgreSQL, Elasticsearch, Meilisearch, Aerospike, ClickHouse, MongoDB, Cassandra, Redis, InfluxDB, Neo4j, Couchbase, Supabase, Druid, CockroachDB, Kafka, RabbitMQ, Zookeeper</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

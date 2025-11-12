@@ -1,0 +1,9 @@
+database-manager (1.0.0-1) unstable; urgency=medium
+
+  * Первый релиз Database Manager
+  * Поддержка 17 типов баз данных и систем обмена сообщениями
+  * Веб-интерфейс на HTMX
+  * Systemd интеграция
+
+ -- Database Manager <admin@example.com>  Mon, 01 Jan 2024 12:00:00 +0000
+

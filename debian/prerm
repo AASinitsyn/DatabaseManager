@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    # Останавливаем сервис перед удалением
+    if systemctl is-active --quiet database-manager.service; then
+        systemctl stop database-manager.service || true
+    fi
+    
+    # Отключаем автозапуск
+    systemctl disable database-manager.service >/dev/null 2>&1 || true
+fi
+
+exit 0
+

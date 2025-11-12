@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "purge" ]; then
+    # Удаляем конфигурационные файлы при полном удалении
+    if [ -d /etc/database-manager ]; then
+        rm -rf /etc/database-manager
+    fi
+    
+    if [ -d /var/lib/database-manager ]; then
+        rm -rf /var/lib/database-manager
+    fi
+    
+    # Перезагружаем systemd
+    systemctl daemon-reload >/dev/null 2>&1 || true
+fi
+
+exit 0
+
