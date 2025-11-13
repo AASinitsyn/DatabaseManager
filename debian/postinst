@@ -17,6 +17,11 @@ if [ "$1" = "configure" ]; then
         chmod 644 /etc/database-manager/users.json
     fi
     
+    if [ ! -f /etc/database-manager/app.json ]; then
+        echo '{"port": "8081"}' > /etc/database-manager/app.json
+        chmod 644 /etc/database-manager/app.json
+    fi
+    
     # Устанавливаем права доступа
     chown -R root:root /etc/database-manager
     chown -R root:root /var/lib/database-manager
@@ -30,7 +35,7 @@ if [ "$1" = "configure" ]; then
     
     echo "Database Manager установлен успешно!"
     echo "Для запуска сервиса выполните: sudo systemctl start database-manager"
-    echo "Сервис будет доступен по адресу: http://localhost:8080"
+    echo "Порт по умолчанию: 8081 (можно изменить в /etc/database-manager/app.json)"
 fi
 
 exit 0

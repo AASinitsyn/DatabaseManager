@@ -12,8 +12,9 @@ RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
-# Переменные окружения
-Environment="PORT=8080"
+# Порт настраивается через /etc/database-manager/app.json
+# Для переопределения можно использовать переменную окружения:
+# Environment="PORT=8081"
 
 [Install]
 WantedBy=multi-user.target

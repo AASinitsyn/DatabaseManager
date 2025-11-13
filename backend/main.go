@@ -183,9 +183,18 @@ func main() {
 
 	handler := middleware.CORSMiddleware(mux)
 
+	appConfig, err := config.LoadAppConfig()
+	if err != nil {
+		log.Printf("Ошибка загрузки конфигурации: %v", err)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		if appConfig != nil && appConfig.Port != "" {
+			port = appConfig.Port
+		} else {
+			port = "8081"
+		}
 	}
 
 	fmt.Printf("Сервер запущен на порту %s\n", port)

@@ -12,6 +12,7 @@ import (
 var (
 	ConnectionsFile = getConfigPath("connections.json")
 	UsersFile       = getConfigPath("users.json")
+	AppConfigFile   = getConfigPath("app.json")
 )
 
 func getConfigPath(filename string) string {
@@ -23,10 +24,15 @@ func getConfigPath(filename string) string {
 	return filepath.Join("config", filename)
 }
 
+type AppConfig struct {
+	Port string `json:"port"`
+}
+
 var (
 	mu          sync.RWMutex
 	connections []models.Connection
 	users       []models.User
+	appConfig   *AppConfig
 )
 
 func LoadConnections() ([]models.Connection, error) {
@@ -201,5 +207,67 @@ func AddUser(user models.User) error {
 	usrs := GetUsers()
 	usrs = append(usrs, user)
 	return SaveUsers(usrs)
+}
+
+func LoadAppConfig() (*AppConfig, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	data, err := os.ReadFile(AppConfigFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			defaultConfig := &AppConfig{Port: "8081"}
+			appConfig = defaultConfig
+			if err := SaveAppConfig(defaultConfig); err != nil {
+				return defaultConfig, nil
+			}
+			return defaultConfig, nil
+		}
+		return nil, fmt.Errorf("ошибка чтения файла конфигурации: %w", err)
+	}
+
+	if len(data) == 0 {
+		defaultConfig := &AppConfig{Port: "8081"}
+		appConfig = defaultConfig
+		return defaultConfig, nil
+	}
+
+	var cfg AppConfig
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга конфигурации: %w", err)
+	}
+
+	if cfg.Port == "" {
+		cfg.Port = "8081"
+	}
+
+	appConfig = &cfg
+	return &cfg, nil
+}
+
+func SaveAppConfig(cfg *AppConfig) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return fmt.Errorf("ошибка сериализации конфигурации: %w", err)
+	}
+
+	if err := os.WriteFile(AppConfigFile, data, 0644); err != nil {
+		return fmt.Errorf("ошибка записи файла конфигурации: %w", err)
+	}
+
+	appConfig = cfg
+	return nil
+}
+
+func GetAppConfig() *AppConfig {
+	mu.RLock()
+	defer mu.RUnlock()
+	if appConfig == nil {
+		return &AppConfig{Port: "8081"}
+	}
+	return appConfig
 }
 
