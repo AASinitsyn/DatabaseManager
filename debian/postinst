@@ -18,7 +18,7 @@ if [ "$1" = "configure" ]; then
     fi
     
     if [ ! -f /etc/database-manager/app.json ]; then
-        echo '{"port": "8081"}' > /etc/database-manager/app.json
+        echo '{"host": "0.0.0.0", "port": "8081"}' > /etc/database-manager/app.json
         chmod 644 /etc/database-manager/app.json
     fi
     

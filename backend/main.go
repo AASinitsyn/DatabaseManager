@@ -188,6 +188,15 @@ func main() {
 		log.Printf("Ошибка загрузки конфигурации: %v", err)
 	}
 
+	host := os.Getenv("HOST")
+	if host == "" {
+		if appConfig != nil && appConfig.Host != "" {
+			host = appConfig.Host
+		} else {
+			host = "0.0.0.0"
+		}
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		if appConfig != nil && appConfig.Port != "" {
@@ -197,10 +206,15 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Сервер запущен на порту %s\n", port)
-	fmt.Printf("Откройте http://localhost:%s в браузере\n", port)
+	displayHost := host
+	if displayHost == "0.0.0.0" {
+		displayHost = "localhost"
+	}
+
+	fmt.Printf("Сервер запущен на %s:%s\n", host, port)
+	fmt.Printf("Откройте http://%s:%s в браузере\n", displayHost, port)
 	
-	if err := http.ListenAndServe(":"+port, handler); err != nil {
+	if err := http.ListenAndServe(host+":"+port, handler); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -25,6 +25,7 @@ func getConfigPath(filename string) string {
 }
 
 type AppConfig struct {
+	Host string `json:"host"`
 	Port string `json:"port"`
 }
 
@@ -216,7 +217,7 @@ func LoadAppConfig() (*AppConfig, error) {
 	data, err := os.ReadFile(AppConfigFile)
 	if err != nil {
 		if os.IsNotExist(err) {
-			defaultConfig := &AppConfig{Port: "8081"}
+			defaultConfig := &AppConfig{Host: "0.0.0.0", Port: "8081"}
 			appConfig = defaultConfig
 			if err := SaveAppConfig(defaultConfig); err != nil {
 				return defaultConfig, nil
@@ -227,7 +228,7 @@ func LoadAppConfig() (*AppConfig, error) {
 	}
 
 	if len(data) == 0 {
-		defaultConfig := &AppConfig{Port: "8081"}
+		defaultConfig := &AppConfig{Host: "0.0.0.0", Port: "8081"}
 		appConfig = defaultConfig
 		return defaultConfig, nil
 	}
@@ -237,6 +238,9 @@ func LoadAppConfig() (*AppConfig, error) {
 		return nil, fmt.Errorf("ошибка парсинга конфигурации: %w", err)
 	}
 
+	if cfg.Host == "" {
+		cfg.Host = "0.0.0.0"
+	}
 	if cfg.Port == "" {
 		cfg.Port = "8081"
 	}
@@ -266,7 +270,7 @@ func GetAppConfig() *AppConfig {
 	mu.RLock()
 	defer mu.RUnlock()
 	if appConfig == nil {
-		return &AppConfig{Port: "8081"}
+		return &AppConfig{Host: "0.0.0.0", Port: "8081"}
 	}
 	return appConfig
 }
