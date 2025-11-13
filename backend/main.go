@@ -181,7 +181,7 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	handler := middleware.CORSMiddleware(mux)
+	handler := middleware.ProxyMiddleware(middleware.CORSMiddleware(mux))
 
 	appConfig, err := config.LoadAppConfig()
 	if err != nil {
@@ -212,7 +212,11 @@ func main() {
 	}
 
 	fmt.Printf("Сервер запущен на %s:%s\n", host, port)
-	fmt.Printf("Откройте http://%s:%s в браузере\n", displayHost, port)
+	
+	// Проверяем, не запущены ли мы в Alpine Linux (контейнер без браузера)
+	if _, err := os.Stat("/etc/alpine-release"); os.IsNotExist(err) {
+		fmt.Printf("Откройте http://%s:%s в браузере\n", displayHost, port)
+	}
 	
 	if err := http.ListenAndServe(host+":"+port, handler); err != nil {
 		log.Fatal(err)
