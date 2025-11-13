@@ -35,13 +35,18 @@ sleep 2
 if kill -0 $SERVER_PID 2>/dev/null; then
     echo "✅ Сервер запущен (PID: $SERVER_PID)"
     
-    # Определяем порт
+    # Определяем порт из конфига или переменной окружения
     PORT=${PORT:-8081}
+    if [ -f "config/app.json" ]; then
+        CONFIG_PORT=$(grep -o '"port"[[:space:]]*:[[:space:]]*"[^"]*"' config/app.json | cut -d'"' -f4)
+        if [ -n "$CONFIG_PORT" ]; then
+            PORT=$CONFIG_PORT
+        fi
+    fi
     
     # Проверяем, не запущены ли мы в Alpine Linux
     if [ -f /etc/alpine-release ]; then
         echo "ℹ️  Alpine Linux обнаружен, браузер не будет открыт автоматически"
-        echo "   Сервер доступен по адресу: http://localhost:$PORT"
     else
         echo "🌐 Открытие браузера..."
         
