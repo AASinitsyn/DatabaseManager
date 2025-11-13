@@ -50,6 +50,11 @@ func ProxyMiddleware(next http.Handler) http.Handler {
 			}
 		}
 
+		// Устанавливаем правильный Content-Length если нужно
+		if r.ContentLength == 0 && r.Method != "GET" && r.Method != "HEAD" {
+			r.ContentLength = -1
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

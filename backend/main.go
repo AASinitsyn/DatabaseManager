@@ -218,7 +218,15 @@ func main() {
 		fmt.Printf("Откройте http://%s:%s в браузере\n", displayHost, port)
 	}
 	
-	if err := http.ListenAndServe(host+":"+port, handler); err != nil {
+	server := &http.Server{
+		Addr:         host + ":" + port,
+		Handler:      handler,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
