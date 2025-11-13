@@ -37,24 +37,24 @@ sleep 2
 if kill -0 $SERVER_PID 2>/dev/null; then
     echo "✅ Сервер запущен (PID: $SERVER_PID)"
     
+    # Определяем порт
+    PORT=${PORT:-8081}
+    
     # Проверяем, не запущены ли мы в Alpine Linux
     if [ -f /etc/alpine-release ]; then
         echo "ℹ️  Alpine Linux обнаружен, браузер не будет открыт автоматически"
-        echo "   Откройте браузер вручную по адресу из вывода сервера выше"
+        echo "   Сервер доступен по адресу: http://localhost:$PORT"
     else
         echo "🌐 Открытие браузера..."
         
         # Определяем команду для открытия браузера в зависимости от ОС
         if [ "$(uname)" = "Darwin" ]; then
             # macOS
-            PORT=${PORT:-8081}
             open http://localhost:$PORT
         elif [ "$(uname)" = "Linux" ]; then
             # Linux
-            PORT=${PORT:-8081}
             xdg-open http://localhost:$PORT 2>/dev/null || sensible-browser http://localhost:$PORT 2>/dev/null || echo "Откройте браузер вручную: http://localhost:$PORT"
         else
-            PORT=${PORT:-8081}
             echo "Откройте браузер вручную: http://localhost:$PORT"
         fi
     fi
