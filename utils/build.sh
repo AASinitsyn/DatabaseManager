@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
 # Определяем корневую директорию проекта
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Переходим в корень проекта
@@ -32,20 +32,17 @@ echo "⏳ Ожидание запуска сервера..."
 sleep 2
 
 # Проверяем, что сервер запустился
-if ps -p $SERVER_PID > /dev/null; then
+if kill -0 $SERVER_PID 2>/dev/null; then
     echo "✅ Сервер запущен (PID: $SERVER_PID)"
     echo "🌐 Открытие браузера..."
     
     # Определяем команду для открытия браузера в зависимости от ОС
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [ "$(uname)" = "Darwin" ]; then
         # macOS
         open http://localhost:8080
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    elif [ "$(uname)" = "Linux" ]; then
         # Linux
         xdg-open http://localhost:8080 2>/dev/null || sensible-browser http://localhost:8080 2>/dev/null || echo "Откройте браузер вручную: http://localhost:8080"
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-        # Windows (Git Bash)
-        start http://localhost:8080
     else
         echo "Откройте браузер вручную: http://localhost:8080"
     fi
